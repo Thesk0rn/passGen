@@ -4,77 +4,102 @@
 #include <stdint.h>
 #include <math.h>
 
-#define NOM_FICHIER "password.txt"
+#define DEFAULT_FILE "password.txt"
 
 #define DEBUT_ASCII 48
 #define FIN_ASCII 122
 #define TAILLE_ASCII FIN_ASCII-DEBUT_ASCII
 #define erase() printf("\033[H\033[2J");
 
-void help(void);
+void man(void);
 
-void writeFile(char str);
-void Genere(int NbCharMax);
-uint64_t nombresPass(int taille);
+void writeFile(char str, char* fileName);
+void Genere(int NbCharMax, char* fileName);
+uint64_t numPass(int length);
 
 int main(int argc, char** argv)
 {
+    int validArg = 0;
+    char* fileName = NULL;
+
     if(argc < 2)
     {
-        printf("Saisissez « passGen --help » pour afficher l'aide.\n");
+        man();
         return EXIT_SUCCESS;
     }
     if(argc == 2)
     {
         if((strcmp(argv[1], "--help") == 0) || (strcmp(argv[1], "-h") == 0))
         {
-            help();
+            man();
             return EXIT_SUCCESS;
         }
         else
         {
-            printf("Saisissez « passGen --help » pour afficher l'aide.\n");
+            man();
             return EXIT_SUCCESS;
         }
     }
-    else if(argc == 3)
+    else if(argc > 2)
     {
-        if(strcmp(argv[1], "-n") == 0)
+        for(int i = 1; i<argc; i++)
         {
-            int nbPassword = 0;
+            if(strcmp(argv[i], "-o") == 0)
+            {
+                if(argc>=i+1)
+                {
+                    fileName = malloc(strlen(argv[i+1])*sizeof(char));
+                    strcpy(fileName, argv[i+1]);
+                }
+                else
+                {
+                    man();
+                    return EXIT_SUCCESS;
+                }
+            }
 
-            for(int i = 1; i < atoi(argv[2])+1; i++)
-                nbPassword += nombresPass(i);
+            if(strcmp(argv[i], "-n") == 0)
+            {
+                int nbPassword = 0;
+                validArg = 1;
 
-            printf("Vous allez générer %d mots de passes.\n", nbPassword);
+                for(int j = 1; j < atoi(argv[i+1])+1; j++)
+                    nbPassword += numPass(j);
 
-            Genere(atoi(argv[2]));
+                printf("%d passwords will be generated.\n", nbPassword);
+
+                if(fileName != NULL)
+                    Genere(atoi(argv[i+1]), fileName);
+                else
+                    Genere(atoi(argv[i+1]), DEFAULT_FILE);
+            }
         }
-        else
+
+        if(validArg == 0)
         {
-            printf("Saisissez « passGen --help » pour afficher l'aide.\n");
+            man();
             return EXIT_SUCCESS;
         }
     }
     else
     {
-        printf("Saisissez « passGen --help » pour afficher l'aide.\n");
+        man();
         return EXIT_SUCCESS;
     }
 
     return EXIT_SUCCESS;
 }
 
-void writeFile(char str){
+void writeFile(char str, char* fileName){
     FILE* fichier = NULL;
 
-    fichier = fopen(NOM_FICHIER, "a");
+    fichier = fopen(fileName, "a");
     fputc(str, fichier);
 
     fclose(fichier);
 }
 
-void Genere(int NbCharMax)
+void Genere(int NbCharMax, char* fileName)
 {
   char *mdp = NULL;
   mdp = malloc(NbCharMax*sizeof(char));
@@ -83,10 +108,10 @@ void Genere(int NbCharMax)
 
   FILE* fichier = NULL;
 
-  fichier = fopen(NOM_FICHIER, "w");
+  fichier = fopen(fileName, "w");
   fclose(fichier);
 
-  fichier = fopen(NOM_FICHIER, "a");
+  fichier = fopen(fileName, "a");
 
   for(int nbChar=0;nbChar<NbCharMax;nbChar++)
   {
@@ -103,13 +128,14 @@ void Genere(int NbCharMax)
          mdp[cursorCara] = cursorAscii;
 
          for(int i=0;i<=nbChar;i++)
-           writeFile(mdp[i]);
+           writeFile(mdp[i], fileName);
 
-         writeFile('\n');
+         writeFile('\n', fileName);
 
          ++nbPass;
+
          erase();
-         printf("%d mots de passes créés.\n", nbPass);
+         printf("%d passwords created.\n", nbPass);
        }
 
        if(cursorCara > 0)
@@ -128,15 +154,16 @@ void Genere(int NbCharMax)
   }
 }
 
-uint64_t nombresPass(int taille)
+uint64_t numPass(int length)
 {
-    return(pow(TAILLE_ASCII, taille));
+    return(pow(TAILLE_ASCII, length));
 }
 
-void help(void)
+void man(void)
 {
-    printf("Utilisation : passGen [OPTION]...\n");
-    printf("-n [nombre]       Créé tous les mots de passes possibles pour [nombre] caractères maximum.\n");
-    printf("-o [fichier]      Change le fichier de sortie pour [fichier]. 'password.txt' est généré automatiquement sans.\n");
-    printf("-h ou --help      Affiche ce menu d'aide.\n\n");
+    printf("Usage : passGen [OPTION]...\n");
+    printf("        passGen -o <file> -n <number>\n\n");
+    printf("-o <file>         Change output file for <file>. 'password.txt' is the default output if none is specified\n");
+    printf("-n <number>       Create passwords for <number> max char\n");
+    printf("-h or --help      Display the help menu\n");
 }
