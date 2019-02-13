@@ -10,9 +10,13 @@ Run the Makefile to compile passGen.
 
 <p>Exemples:</p>
 
-        ```passGen -o passlist -n 4```</br>
-        ```passgen -r 1000 5```</br>
-    
+```
+passGen -o passlist -n 4
+```
+```
+passGen -r 1000 5
+```
+
 </br>   
 -o <file>                      Change output file for <file>. 'password.txt' is the default output if none is specified</br>
 -n <number>                    Create passwords for <number> max char</br>
