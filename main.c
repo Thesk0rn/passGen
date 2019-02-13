@@ -14,9 +14,6 @@
 
 void man(void);
 
-int writeFile(char str, const char* fileName);
-int strFile(char *str, const char* filename);
-
 int Genere(int NbCharMax, const char* fileName);
 int randGen(int nbPassword, int maxPass, const char* fileName);
 uint64_t numPass(int length);
@@ -126,10 +123,6 @@ int main(int argc, char** argv)
         {
             man();
             return EXIT_SUCCESS;
-        }
-        else
-        {
-            free(fileName);
         }
     }
     else
